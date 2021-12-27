@@ -5,7 +5,7 @@ using WebApiAutores.Controllers.Entidades;
 namespace WebApiAutores.Controllers
 {
     [ApiController]
-    [Route("api/autores")]
+    [Route("api/autores")] // == [Route("api/[controller]")]
     public class AutoresController: ControllerBase
     {
         private readonly ApplicationDBContext context;
@@ -16,9 +16,43 @@ namespace WebApiAutores.Controllers
         }
 
         [HttpGet]
+        //[HttpGet("listado")] Se pueden tener multiples rutas para el mismo endpoint
+        //[HttpGet("/listado")] Se elimina el prefijo de la ruta del controlador y se sustituye por /listado simplemente
         public async Task<ActionResult<List<Autor>>> Get()
         {
             return await context.Autores.Include(x=> x.Libros).ToListAsync();
+        }
+
+        [HttpGet("primero")]
+        public async Task<ActionResult<Autor>> PrimerAutor()
+        {
+            return await context.Autores.FirstOrDefaultAsync();
+        }
+
+        [HttpGet("{id:int}")]
+        public async Task<ActionResult<Autor>> Get(int id)
+        {
+            var autor = await context.Autores.FirstOrDefaultAsync(x => x.Id == id);
+
+            if (autor == null)
+            {
+                return NotFound();
+            }
+
+            return autor;
+        }
+
+        [HttpGet("{nombre}")]
+        public async Task<ActionResult<Autor>> Get(string nombre)
+        {
+            var autor = await context.Autores.FirstOrDefaultAsync(x => x.Nombre.Contains(nombre));
+
+            if (autor == null)
+            {
+                return NotFound();
+            }
+
+            return autor;
         }
 
         [HttpPost]
